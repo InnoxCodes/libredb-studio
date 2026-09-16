@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { storage } from "@/lib/storage";
 import { useAllConnections } from "@/hooks/use-all-connections";
-import { getDBIcon, getDBColor } from "@/lib/db-ui-config";
+import { getDBIcon, getDBColor, getDBConfig } from "@/lib/db-ui-config";
+import { EXTERNAL_DATABASE_TYPES } from "@/lib/db/compatibility";
 import { formatBytes } from "@/lib/db/utils/pool-manager";
 import {
   type DatabaseType,
@@ -1108,12 +1109,21 @@ function QuickActionsSection() {
 
 // ─── Empty State ─────────────────────────────────────────────────────────────
 
+// Keeps the card's second line short: name a handful of engines, not all sixteen.
+const DB_TYPES_PREVIEW_COUNT = 7;
+
 function EmptyState() {
+  const externalEngineLabels = EXTERNAL_DATABASE_TYPES.map((type) => getDBConfig(type).label);
+  const hiddenEngineCount = externalEngineLabels.length - DB_TYPES_PREVIEW_COUNT;
+  const dbTypesDescription =
+    externalEngineLabels.slice(0, DB_TYPES_PREVIEW_COUNT).join(", ") +
+    (hiddenEngineCount > 0 ? `, +${hiddenEngineCount} more` : "");
+
   const features = [
     {
       icon: Database,
-      label: "7 DB Types",
-      description: "PostgreSQL, MySQL, SQLite, MongoDB, Redis, Oracle, MSSQL",
+      label: `${EXTERNAL_DATABASE_TYPES.length} DB Types`,
+      description: dbTypesDescription,
     },
     {
       icon: Sparkles,

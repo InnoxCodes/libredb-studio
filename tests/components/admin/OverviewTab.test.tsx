@@ -75,6 +75,8 @@ import React from "react";
 import { mockGlobalFetch, restoreGlobalFetch } from "../../helpers/mock-fetch";
 
 import { OverviewTab } from "@/components/admin/tabs/OverviewTab";
+import { EXTERNAL_DATABASE_TYPES } from "@/lib/db/compatibility";
+import { getDBConfig } from "@/lib/db-ui-config";
 
 // =============================================================================
 // OverviewTab Tests
@@ -190,6 +192,28 @@ describe("OverviewTab", () => {
 
     // The empty state shows "Welcome to Command Center"
     expect(queryByText("Welcome to Command Center")).not.toBeNull();
+  });
+
+  test("empty state DB Types card is derived from EXTERNAL_DATABASE_TYPES, not hand-typed", async () => {
+    mockGetConnections.mockImplementation(() => []);
+
+    let renderResult: ReturnType<typeof render>;
+    await act(async () => {
+      renderResult = render(<OverviewTab user={{ username: "admin", role: "admin" }} />);
+    });
+    const { queryByText } = renderResult!;
+
+    // The count matches the real external-engine catalog, not a stale literal.
+    expect(queryByText(`${EXTERNAL_DATABASE_TYPES.length} DB Types`)).not.toBeNull();
+    expect(queryByText("7 DB Types")).toBeNull();
+
+    // The description previews the first few engine labels and names the rest as "+N more",
+    // matching what a real card build with the current catalog produces.
+    const previewCount = 7;
+    const labels = EXTERNAL_DATABASE_TYPES.map((type) => getDBConfig(type).label);
+    const hidden = labels.length - previewCount;
+    const expectedDescription = `${labels.slice(0, previewCount).join(", ")}, +${hidden} more`;
+    expect(queryByText(expectedDescription)).not.toBeNull();
   });
 
   test("shows hero section when connections exist", async () => {
