@@ -1109,15 +1109,25 @@ function QuickActionsSection() {
 
 // ─── Empty State ─────────────────────────────────────────────────────────────
 
-// Keeps the card's second line short: name a handful of engines, not all sixteen.
-const DB_TYPES_PREVIEW_COUNT = 7;
+// Keeps the card's second line short: name a handful of engines, not the whole catalog.
+// Picked by hand rather than sliced off registry order, so the seven shown span the product's
+// range (relational, document, key-value, wide-column, search, analytics) instead of reading
+// as "six flavours of SQL" — every id here must still be in EXTERNAL_DATABASE_TYPES.
+export const DB_TYPES_PREVIEW: readonly DatabaseType[] = [
+  "postgres",
+  "mysql",
+  "mongodb",
+  "redis",
+  "cassandra",
+  "elasticsearch",
+  "clickhouse",
+];
 
 function EmptyState() {
-  const externalEngineLabels = EXTERNAL_DATABASE_TYPES.map((type) => getDBConfig(type).label);
-  const hiddenEngineCount = externalEngineLabels.length - DB_TYPES_PREVIEW_COUNT;
+  const previewEngineLabels = DB_TYPES_PREVIEW.map((type) => getDBConfig(type).label);
+  const hiddenEngineCount = EXTERNAL_DATABASE_TYPES.length - DB_TYPES_PREVIEW.length;
   const dbTypesDescription =
-    externalEngineLabels.slice(0, DB_TYPES_PREVIEW_COUNT).join(", ") +
-    (hiddenEngineCount > 0 ? `, +${hiddenEngineCount} more` : "");
+    previewEngineLabels.join(", ") + (hiddenEngineCount > 0 ? `, +${hiddenEngineCount} more` : "");
 
   const features = [
     {

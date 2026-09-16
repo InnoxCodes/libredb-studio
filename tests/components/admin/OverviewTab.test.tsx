@@ -74,7 +74,7 @@ import React from "react";
 
 import { mockGlobalFetch, restoreGlobalFetch } from "../../helpers/mock-fetch";
 
-import { OverviewTab } from "@/components/admin/tabs/OverviewTab";
+import { OverviewTab, DB_TYPES_PREVIEW } from "@/components/admin/tabs/OverviewTab";
 import { EXTERNAL_DATABASE_TYPES } from "@/lib/db/compatibility";
 import { getDBConfig } from "@/lib/db-ui-config";
 
@@ -207,12 +207,14 @@ describe("OverviewTab", () => {
     expect(queryByText(`${EXTERNAL_DATABASE_TYPES.length} DB Types`)).not.toBeNull();
     expect(queryByText("7 DB Types")).toBeNull();
 
-    // The description previews the first few engine labels and names the rest as "+N more",
-    // matching what a real card build with the current catalog produces.
-    const previewCount = 7;
-    const labels = EXTERNAL_DATABASE_TYPES.map((type) => getDBConfig(type).label);
-    const hidden = labels.length - previewCount;
-    const expectedDescription = `${labels.slice(0, previewCount).join(", ")}, +${hidden} more`;
+    // The description previews the hand-picked DB_TYPES_PREVIEW labels and names the rest as
+    // "+N more". getDBConfig is mocked to "PostgreSQL" for every type in this file, so this
+    // only pins the join/count mechanics; DB_TYPES_PREVIEW's real, category-spanning labels
+    // and its membership in EXTERNAL_DATABASE_TYPES are checked unmocked in
+    // tests/unit/components/overview-tab-db-types-preview.test.ts.
+    const labels = DB_TYPES_PREVIEW.map((type) => getDBConfig(type).label);
+    const hidden = EXTERNAL_DATABASE_TYPES.length - DB_TYPES_PREVIEW.length;
+    const expectedDescription = `${labels.join(", ")}, +${hidden} more`;
     expect(queryByText(expectedDescription)).not.toBeNull();
   });
 
