@@ -81,8 +81,11 @@ describe("ColumnList", () => {
     expect(nameEl).not.toBeNull();
     expect(nameEl!.className).toContain("flex-1");
     // The type span truncates instead of forcing the name out: shrink-0 plus a
-    // capped, truncating width, with the full type available on hover.
+    // capped, truncating width, with the full type available on hover. The cap
+    // is the class actually doing the work: dropping it (or widening it enough)
+    // leaves shrink-0/truncate in place but the name is pushed to zero width again.
     expect(typeEl!.className).toContain("shrink-0");
+    expect(typeEl!.className).toContain("max-w-[40%]");
     expect(typeEl!.className).toContain("truncate");
     expect(typeEl!.getAttribute("title")).toBe("timestamp without time zone");
   });
